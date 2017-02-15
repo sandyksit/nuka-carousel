@@ -164,7 +164,7 @@ const Carousel = React.createClass({
 
   render() {
     var self = this;
-    var children = React.Children.count(this.props.children) > 1 ? this.formatChildren(this.props.children) : this.props.children;
+    var children = React.Children.count(this.props.children) > 1 ? this.formatChildren(this.props.children, this.state.currentSlide) : this.props.children;
     return (
       <div className={['slider', this.props.className || ''].join(' ')} ref="slider" style={assign(this.getSliderStyles(), this.props.style || {})}>
         <div className="slider-frame"
@@ -619,7 +619,8 @@ const Carousel = React.createClass({
     var self = this;
     var positionValue = this.props.vertical ? this.getTweeningValue('top') : this.getTweeningValue('left');
     return React.Children.map(children, function(child, index) {
-      return <li className="slider-slide" style={self.getSlideStyles(index, positionValue)} key={index}>{child}</li>
+		let display = currentSlide!=index ? 'none' : undefined
+      return <li className="slider-slide" style={self.getSlideStyles(index, positionValue, display)} key={index}>{child}</li>
     });
   },
 
@@ -733,7 +734,7 @@ const Carousel = React.createClass({
       margin: this.props.vertical ? (this.props.cellSpacing / 2) * -1 + 'px 0px'
                                   : '0px ' + (this.props.cellSpacing / 2) * -1 + 'px',
       padding: 0,
-      height: this.props.vertical ? listWidth + spacingOffset : this.state.slideHeight,
+      height: this.props.vertical ? listWidth + spacingOffset : this.state.slideHeight === 0 ? this.state.frameWidth : this.state.slideHeight,
       width: this.props.vertical ? 'auto' : listWidth + spacingOffset,
       cursor: this.state.dragging === true ? 'pointer' : 'inherit',
       boxSizing: 'border-box',
@@ -757,13 +758,13 @@ const Carousel = React.createClass({
     }
   },
 
-  getSlideStyles(index, positionValue) {
+  getSlideStyles(index, positionValue, display) {
     var targetPosition = this.getSlideTargetPosition(index, positionValue);
     return {
       position: 'absolute',
       left: this.props.vertical ? 0 : targetPosition,
       top: this.props.vertical ? targetPosition : 0,
-      display: this.props.vertical ? 'block' : 'inline-block',
+      display: display=='none' ? display : this.props.vertical ? 'block' : 'inline-block',
       listStyleType: 'none',
       verticalAlign: 'top',
       width: this.props.vertical ? '100%' : this.state.slideWidth,
